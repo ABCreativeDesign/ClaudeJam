@@ -53,6 +53,28 @@
         color: #888;
         cursor: default;
       }
+      .footer-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .footer-cta {
+        background: none;
+        border: none;
+        padding: 0;
+        height: 16px;
+        font: inherit;
+        font-weight: 600;
+        color: #f59e0b;
+        cursor: pointer;
+      }
+      .footer-cta:hover {
+        color: #fbbf24;
+        text-decoration: underline;
+      }
+      .footer-cta[hidden] {
+        display: none;
+      }
       /* Centered on the full panel width, not between the uneven paddings.
          top/bottom match the footer content area (4px bottom padding). */
       .dev-badge {
@@ -1229,6 +1251,26 @@
         </div>
       </div>
 
+      <div class="page-warning-banner" id="versionWarningBanner">
+        <div class="page-warning-text" id="versionWarningText"></div>
+        <div class="page-warning-actions">
+          <button
+            class="page-warning-return"
+            id="versionWarningHelp"
+            title="Opens the update steps on GitHub"
+          >
+            How to update
+          </button>
+          <button
+            class="page-warning-dismiss"
+            id="versionWarningDismiss"
+            title="Hide until the plugin reconnects"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+
       <div id="connectedView" style="display: none">
         <div class="section">
           <div class="section-label">Board</div>
@@ -1325,7 +1367,17 @@
           hidden
           >DEV</span
         >
-        <span class="footer-version" id="footerVersion" title="ClaudeJam version"></span>
+        <span class="footer-right">
+          <button
+            class="footer-cta"
+            id="versionCta"
+            title="Plugin and server versions differ. Click for details."
+            hidden
+          >
+            Update needed
+          </button>
+          <span class="footer-version" id="footerVersion" title="ClaudeJam version"></span>
+        </span>
       </div>
       <div class="resize-handle" id="resizeHandle">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -1341,6 +1393,40 @@
 
     <script>
       let wsPort = 3766;
+      // ── Plugin/server version check ──
+      // The server (1.5.5+) sends {type:"server-hello", version} on connect.
+      // No hello within HELLO_TIMEOUT_MS means a server older than 1.5.5.
+      const HELLO_TIMEOUT_MS = 2000;
+      let pluginVersion = null;
+      let serverVersion = null; // null = unknown yet, "" = too old to say
+      let helloTimer = null;
+
+      function checkVersions() {
+        const banner = document.getElementById("versionWarningBanner");
+        const footer = document.getElementById("footerVersion");
+        if (!pluginVersion || serverVersion === null) return;
+        footer.title = serverVersion
+          ? `Plugin v${pluginVersion} · Server v${serverVersion}`
+          : `Plugin v${pluginVersion} · Server older than v1.5.5`;
+        if (serverVersion === pluginVersion) {
+          banner.classList.remove("visible");
+          document.getElementById("versionCta").hidden = true;
+          return;
+        }
+        document.getElementById("versionWarningText").textContent =
+          serverVersion
+            ? `This plugin is v${pluginVersion} but the server is v${serverVersion}. When versions differ, features or fixes may be missing and some actions may not work as expected. Update both so they match.`
+            : `The server is older than this plugin (v${pluginVersion}). Older servers may be missing features or fixes, so some actions may not work as expected. Update both so they match.`;
+        banner.classList.add("visible");
+      }
+
+      function resetVersionCheck() {
+        clearTimeout(helloTimer);
+        serverVersion = null;
+        document.getElementById("versionWarningBanner").classList.remove("visible");
+        document.getElementById("versionCta").hidden = true;
+      }
+
       const REPO_URL =
         "https://github.com/ABCreativeDesign/ClaudeJam";
       const TEST_PROMPT =
@@ -1702,6 +1788,13 @@
         ws = new WebSocket("ws://localhost:" + wsPort);
 
         ws.onopen = () => {
+          resetVersionCheck();
+          helloTimer = setTimeout(() => {
+            if (serverVersion === null) {
+              serverVersion = "";
+              checkVersions();
+            }
+          }, HELLO_TIMEOUT_MS);
           setStatus("connected");
           updateOnboardingConnection(true);
           parent.postMessage(
@@ -1711,6 +1804,7 @@
         };
 
         ws.onclose = () => {
+          resetVersionCheck();
           setStatus("disconnected");
           updateOnboardingConnection(false);
           ws = null;
@@ -1724,6 +1818,12 @@
           try {
             cmd = JSON.parse(event.data);
           } catch {
+            return;
+          }
+          if (cmd.type === "server-hello") {
+            clearTimeout(helloTimer);
+            serverVersion = cmd.version || "";
+            checkVersions();
             return;
           }
           parent.postMessage(
@@ -1747,8 +1847,10 @@
         if (msg.type === "onboarding-status") {
           if (msg.isDev) document.getElementById("devBadge").hidden = false;
           if (msg.version) {
+            pluginVersion = msg.version;
             document.getElementById("footerVersion").textContent =
               "v" + msg.version;
+            checkVersions();
           }
           if (msg.defaultWsPort) {
             document.getElementById("defaultPortNum").textContent =
@@ -1850,6 +1952,36 @@
             .getElementById("pageWarningBanner")
             .classList.remove("visible");
         });
+
+      document
+        .getElementById("versionWarningHelp")
+        .addEventListener("click", () => {
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "open-external",
+                url: REPO_URL + "#updating",
+              },
+            },
+            "*",
+          );
+        });
+
+      document
+        .getElementById("versionWarningDismiss")
+        .addEventListener("click", () => {
+          document
+            .getElementById("versionWarningBanner")
+            .classList.remove("visible");
+          document.getElementById("versionCta").hidden = false;
+        });
+
+      document.getElementById("versionCta").addEventListener("click", () => {
+        document.getElementById("versionCta").hidden = true;
+        document
+          .getElementById("versionWarningBanner")
+          .classList.add("visible");
+      });
 
       // ── Collapse ────────────────────────────────────────────────────────────
       const COLLAPSED_H = 80;

@@ -23,7 +23,7 @@ const MCP_PORT = parseInt(process.env.FIGJAM_MCP_PORT || "3055", 10);
 const WS_PORT = parseInt(process.env.FIGJAM_WS_PORT || "3766", 10);
 const STDIO_MODE = process.argv.includes("--stdio");
 
-const bridge = new Bridge(WS_PORT);
+const bridge = new Bridge(WS_PORT, VERSION);
 const mcpServer = new McpServer({ name: "claudejam", version: VERSION });
 registerTools(mcpServer, bridge);
 

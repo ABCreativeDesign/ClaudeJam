@@ -17,10 +17,14 @@ export class Bridge {
   private queue: PendingCommand[] = [];
   private pending: Map<string, PendingCommand> = new Map();
 
-  constructor(port: number) {
+  constructor(port: number, version?: string) {
     this.wss = new WebSocketServer({ port });
     this.wss.on("connection", (ws) => {
       this.ws = ws;
+      // Introduce ourselves so the plugin can warn when its version and the
+      // server's differ. Has no id, so it is never mistaken for a command
+      // reply. Plugins older than 1.5.5 ignore it.
+      ws.send(JSON.stringify({ type: "server-hello", version }));
       setTimeout(() => this.flushQueue(), 0);
 
       // Keep the connection alive while Claude thinks between tool calls

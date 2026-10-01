@@ -69,4 +69,17 @@ describe("Bridge", () => {
       });
     });
   });
+
+  test("greets each plugin with the server version on connect", (done) => {
+    const versioned = new Bridge(3097, "9.9.9");
+    const client = new WebSocket("ws://localhost:3097");
+    client.once("message", (data) => {
+      expect(JSON.parse(data.toString())).toEqual({
+        type: "server-hello",
+        version: "9.9.9",
+      });
+      client.close();
+      versioned.close(done);
+    });
+  });
 });
