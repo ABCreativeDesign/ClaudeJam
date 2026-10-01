@@ -62,7 +62,7 @@ Claude can create stickies, shapes, text, connectors, tables and code blocks, ed
 - **Claude desktop app (Cowork).** `npx claudejam setup` configures Claude Code. To use ClaudeJam from the Claude desktop app instead, add this to `claude_desktop_config.json` under `mcpServers` (on macOS or Linux, use `npx` instead of `npx.cmd`):
 
   ```json
-  "claudejam": { "command": "npx.cmd", "args": ["claudejam", "--stdio"] }
+  "claudejam": { "command": "npx.cmd", "args": ["-y", "claudejam@latest", "--stdio"] }
   ```
 
 ## How it works
@@ -71,8 +71,32 @@ Claude Code talks to the ClaudeJam server over MCP. The server relays each comma
 
 ## Updating
 
-Download the latest version and replace the plugin folder (or run `git pull` if you cloned it). FigJam picks up the new files the next time you run the plugin.
+The plugin and the server update separately.
+
+**Plugin.** Download the latest version and replace the plugin folder (or run `git pull` if you cloned it). FigJam picks up the new files the next time you run the plugin.
+
+**Server.** `npx` can reuse a copy it downloaded earlier, so the server doesn't always update on its own. What runs depends on how it's listed in your config:
+
+| In your config | What runs |
+|---|---|
+| `claudejam` | Whatever copy npx already has, which may be out of date. |
+| `claudejam@latest` | Checks npm each time Claude starts it. Always current, but starts a little slower and needs internet. |
+| `claudejam@1.5.4` | Exactly that version, until you change it by hand. |
+
+`npx claudejam setup` writes plain `claudejam`. To stay current, run the newest setup and then change that line in your project's `.mcp.json` to use `@latest` (`-y` lets npx download it without stopping to ask):
+
+```
+npx claudejam@latest setup
+```
+
+```json
+"claudejam": { "command": "npx.cmd", "args": ["-y", "claudejam@latest", "--stdio"] }
+```
+
+The Claude desktop app entry under **Good to know** already uses `@latest`. After changing either config, restart Claude so the server reloads.
+
+**Checking versions.** The plugin shows its version in the bottom-right corner of its panel. The plugin and server should be on the same version. If they differ, update both: download the latest plugin files, then restart Claude so the server reloads.
 
 ## License
 
-[MIT](LICENSE) © 2026 ABCreativeDesign
+[MIT](LICENSE) © 2026 Aaron Butler
