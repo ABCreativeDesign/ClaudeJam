@@ -34,6 +34,9 @@ Promise.all([
     isDev: IS_DEV,
     defaultWsPort: DEFAULT_WS_PORT,
     version: PLUGIN_VERSION,
+    // Known locally, so the breadcrumb is filled before any connection
+    file: figma.root.name,
+    page: figma.currentPage.name,
   });
 });
 

@@ -1,4 +1,5 @@
 import express from "express";
+import type { Server } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,7 +24,13 @@ const MCP_PORT = parseInt(process.env.FIGJAM_MCP_PORT || "3055", 10);
 const WS_PORT = parseInt(process.env.FIGJAM_WS_PORT || "3766", 10);
 const STDIO_MODE = process.argv.includes("--stdio");
 
-const bridge = new Bridge(WS_PORT, VERSION);
+// Ports open only when Claude first uses a ClaudeJam tool (see Bridge). In
+// stdio mode the health server starts alongside the bridge, via onListen.
+let startHealth: (() => void) | undefined;
+const bridge = new Bridge(WS_PORT, {
+  version: VERSION,
+  onListen: () => startHealth?.(),
+});
 const mcpServer = new McpServer({ name: "claudejam", version: VERSION });
 registerTools(mcpServer, bridge);
 
@@ -33,11 +40,23 @@ if (STDIO_MODE) {
   app.get("/health", (_req, res) => {
     res.json({ status: "ok", pluginConnected: bridge.connected });
   });
-  const httpServer = app.listen(MCP_PORT, "127.0.0.1", () => {
-    console.error("ClaudeJam MCP server running (stdio mode)");
-    console.error(`  WebSocket: ws://localhost:${WS_PORT}`);
-    console.error(`  Health:    http://localhost:${MCP_PORT}/health`);
-  });
+  let httpServer: Server | null = null;
+  startHealth = () => {
+    const server = app.listen(MCP_PORT, "127.0.0.1", () => {
+      console.error(`  Health:    http://localhost:${MCP_PORT}/health`);
+    });
+    // The health check only powers the plugin's "wrong port" hint, so a
+    // taken port is logged rather than allowed to crash the server.
+    server.on("error", (err) => {
+      console.error("[claudejam] health server unavailable:", err.message);
+      httpServer = null;
+    });
+    httpServer = server;
+  };
+  console.error(`ClaudeJam MCP server v${VERSION} (stdio mode)`);
+  console.error(
+    `  Idle until the first ClaudeJam command, then WebSocket: ws://localhost:${WS_PORT}`,
+  );
 
   // Graceful shutdown — prevents orphaned processes when CC desktop closes
   let shuttingDown = false;
@@ -47,7 +66,9 @@ if (STDIO_MODE) {
     console.error(`[claudejam] shutdown: ${reason}`);
     await Promise.all([
       new Promise<void>((resolve) => bridge.close(() => resolve())),
-      new Promise<void>((resolve) => httpServer.close(() => resolve())),
+      new Promise<void>((resolve) =>
+        httpServer ? httpServer.close(() => resolve()) : resolve(),
+      ),
     ]);
     process.exit(0);
   }

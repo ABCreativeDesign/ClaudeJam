@@ -1,6 +1,6 @@
 {
   "name": "claudejam",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Bring Claude Code into your FigJam session — collaborate on diagrams, flows, and boards in real time",
   "type": "module",
   "bin": {

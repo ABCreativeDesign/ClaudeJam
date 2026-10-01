@@ -13,12 +13,12 @@ ClaudeJam is a FigJam plugin plus a small local server. Claude Code reads and wr
 ## What you'll need
 
 - The **Figma desktop app** (FigJam plugins installed this way only run in the desktop app)
-- **Claude Code**
+- **Claude Code** or **Cowork** (the Claude desktop app)
 - **Node.js**
 
 ## Install
 
-**1. Get the plugin**
+### 1. Get the plugin
 
 Download this repository (green **Code** button, then **Download ZIP**) and unzip it somewhere permanent, or clone it:
 
@@ -26,13 +26,19 @@ Download this repository (green **Code** button, then **Download ZIP**) and unzi
 git clone https://github.com/ABCreativeDesign/ClaudeJam.git
 ```
 
-**2. Add it to FigJam**
+### 2. Add it to FigJam
 
 Open any FigJam file in the Figma desktop app, then go to **Plugins → Development → Import plugin from manifest…** and choose `manifest.json` from the folder you just downloaded.
 
-**3. Connect Claude Code**
+Figma doesn't list ClaudeJam in its Community, so it installs as a development plugin. That's why it lives under **Plugins → Development**; it works the same as any other plugin. Curious why it isn't listed? I wrote about it in my [ClaudeJam case study](https://aaronbutler.com/work/product-ux/ab-creative-design/claudejam/).
 
-In a terminal, inside the project folder you use with Claude Code, run:
+### 3. Connect Claude
+
+Set this up once, for whichever Claude you use.
+
+#### Claude Code
+
+For the Code tab in the Claude desktop app, or Claude Code in a terminal or editor. In the project folder you use with Claude Code, run:
 
 ```
 npx claudejam setup
@@ -40,11 +46,33 @@ npx claudejam setup
 
 This registers the ClaudeJam server with Claude Code for that project.
 
+#### Cowork
+
+For Cowork in the Claude desktop app:
+
+1. In the Claude app, open **Settings → Developer → Edit Config**. This opens `claude_desktop_config.json`.
+2. Add ClaudeJam under `mcpServers`. If the file is empty, it should look like this:
+
+   ```json
+   {
+     "mcpServers": {
+       "claudejam": { "command": "npx.cmd", "args": ["-y", "claudejam@latest", "--stdio"] }
+     }
+   }
+   ```
+
+   If it already has an `mcpServers` section, add just the `"claudejam": …` line inside it, with a comma after the entry before it. On macOS, use `npx` instead of `npx.cmd`.
+3. Fully quit the Claude app (from the system tray on Windows, or the menu bar on macOS) and reopen it.
+
+This also makes ClaudeJam available in the desktop app's Code tab for every project, so you don't need `npx claudejam setup` there as well. (It doesn't apply to Claude Code in a terminal, which uses the setup command above.)
+
 ## Use it
 
-1. Open a FigJam file and run **Plugins → Development → ClaudeJam**.
-2. Open Claude Code in your project and send any message. The server starts on demand, and the plugin shows **Connected** within a few seconds.
-3. Ask Claude to work on the board. For example: *"I need to map out our onboarding flow but I'm not sure where to start. Can you help me think through it on the open FigJam board?"*
+1. Open a FigJam file and run **Plugins → Development → ClaudeJam**. The plugin shows **Waiting** until Claude needs it.
+2. In Claude Code or Cowork, ask Claude to work on the board. For example: *"I need to map out our onboarding flow but I'm not sure where to start. Can you help me think through it on the open FigJam board?"*
+3. ClaudeJam connects the first time Claude uses it, usually within a few seconds, and the plugin switches to **Connected**.
+
+ClaudeJam stays idle until then, so having it set up doesn't affect Claude sessions where you aren't using it.
 
 ## What it can build
 
@@ -58,12 +86,7 @@ Claude can create stickies, shapes, text, connectors, tables and code blocks, ed
 ## Good to know
 
 - **One board at a time.** ClaudeJam works on the FigJam file the plugin is running in. To work on a different board, run the plugin there.
-- **One Claude session at a time.** If two Claude sessions start the ClaudeJam server at once, only the first connects.
-- **Claude desktop app (Cowork).** `npx claudejam setup` configures Claude Code. To use ClaudeJam from the Claude desktop app instead, add this to `claude_desktop_config.json` under `mcpServers` (on macOS or Linux, use `npx` instead of `npx.cmd`):
-
-  ```json
-  "claudejam": { "command": "npx.cmd", "args": ["-y", "claudejam@latest", "--stdio"] }
-  ```
+- **One Claude session at a time.** Only one Claude session can use ClaudeJam at once. If another session already has it, Claude will tell you; finish there, then try again.
 
 ## How it works
 
@@ -93,7 +116,7 @@ npx claudejam@latest setup
 "claudejam": { "command": "npx.cmd", "args": ["-y", "claudejam@latest", "--stdio"] }
 ```
 
-The Claude desktop app entry under **Good to know** already uses `@latest`. After changing either config, restart Claude so the server reloads.
+The Claude desktop app setup under **Install** already uses `@latest`. After changing either config, restart Claude so the server reloads.
 
 **Checking versions.** The plugin shows its version in the bottom-right corner of its panel. The plugin and server should be on the same version. If they differ, update both: download the latest plugin files, then restart Claude so the server reloads.
 

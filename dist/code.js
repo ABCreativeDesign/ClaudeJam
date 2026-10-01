@@ -48,7 +48,7 @@
   var version;
   var init_package = __esm({
     "package.json"() {
-      version = "1.5.5";
+      version = "1.5.6";
     }
   });
 
@@ -74,7 +74,10 @@
           wsPort: resolvedPort,
           isDev: IS_DEV,
           defaultWsPort: DEFAULT_WS_PORT,
-          version
+          version,
+          // Known locally, so the breadcrumb is filled before any connection
+          file: figma.root.name,
+          page: figma.currentPage.name
         });
       });
       var claudeTargetPageId = null;

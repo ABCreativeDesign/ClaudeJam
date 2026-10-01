@@ -713,19 +713,6 @@
         color: #22c55e;
       }
 
-      /* ── Post-connection content ── */
-      .ob-post-connect {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        opacity: 0.3;
-        pointer-events: none;
-        transition: opacity 0.3s;
-      }
-      .ob-post-connect.active {
-        opacity: 1;
-        pointer-events: auto;
-      }
       .ob-prompts-box {
         display: flex;
         flex-direction: column;
@@ -774,6 +761,18 @@
         flex-direction: column;
         gap: 8px;
         flex-shrink: 0;
+      }
+      .ob-inline-link {
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        color: #a78bfa;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .ob-inline-link:hover {
+        color: #c4b5fd;
       }
       .ob-link {
         background: none;
@@ -909,6 +908,16 @@
             Open a terminal in your Claude Code project directory. Then run the
             following command.
           </div>
+          <div class="ob-step-desc">
+            Using Cowork instead?
+            <button
+              class="ob-inline-link"
+              id="btnDesktopSetup"
+              title="Opens the Cowork setup steps on GitHub"
+            >
+              Follow the Cowork setup</button
+            >, then tick both boxes below.
+          </div>
           <div class="ob-section-label" style="margin-top: 4px">
             I have run:
           </div>
@@ -985,12 +994,12 @@
                   />
                 </svg>
               </button>
-              <div class="ob-check-label">Restarted Claude Code.</div>
+              <div class="ob-check-label">Restarted Claude.</div>
             </div>
             <button
               class="ob-help-btn"
               id="btnHelpRestart"
-              title="Why restart Claude Code?"
+              title="Why restart Claude?"
             >
               ?
             </button>
@@ -1008,36 +1017,30 @@
         </button>
       </div>
 
-      <!-- Step 3: Send a Message -->
+      <!-- Step 3: Ask Claude -->
       <div id="obStep3" class="ob-body" style="display: none">
         <div class="ob-step-card">
-          <div class="ob-step-title">Step 3: Send a Message</div>
+          <div class="ob-step-title">Step 3: Ask Claude</div>
           <div class="ob-step-desc">
-            Send Claude Code any message so the plugin can connect.
+            ClaudeJam connects the first time Claude works on the board. Send
+            Claude Code one of these to try it, or ask for anything you like.
           </div>
           <div class="ob-status-row" style="margin-top: 4px">
             <div class="ob-status-left">
               <div class="ob-status-dot" id="obConnDot"></div>
               <div class="ob-status-label" id="obConnText">
-                Waiting for connection…
+                Waiting for Claude…
               </div>
             </div>
             <button
               class="ob-help-btn"
               id="btnHelpConn"
-              title="Why is it waiting?"
+              title="Not connecting? Open the setup guide"
             >
               ?
             </button>
           </div>
-          <div class="ob-post-connect" id="obPostConnect">
-            <div class="ob-section-label" style="margin-top: 4px">
-              Connection established
-            </div>
-            <div class="ob-step-desc">
-              Head back to Claude Code and send a message to get started. Not
-              sure what to say? Try one of these:
-            </div>
+          <div>
             <div class="ob-prompts-box">
               <div class="ob-prompt-item">
                 <span class="ob-prompt-text"
@@ -1323,8 +1326,9 @@
             margin-bottom: 12px;
           "
         >
-          Send a message in <span class="dc-cmd">Claude Code</span> to start the
-          server, then it will connect automatically.
+          Waiting for Claude. ClaudeJam connects the first time Claude works on
+          this board, so ask <span class="dc-cmd">Claude Code</span> to do
+          something here.
         </div>
         <div
           id="dcWrongPort"
@@ -1573,6 +1577,15 @@
             "*",
           );
         });
+      document.getElementById("btnDesktopSetup").addEventListener("click", () => {
+        parent.postMessage(
+          {
+            pluginMessage: { type: "open-external", url: REPO_URL + "#install" },
+          },
+          "*",
+        );
+      });
+
       document.getElementById("btnHelpConn").addEventListener("click", () => {
         parent.postMessage(
           { pluginMessage: { type: "open-external", url: REPO_URL } },
@@ -1660,19 +1673,16 @@
       function updateOnboardingConnection(connected) {
         const dot = document.getElementById("obConnDot");
         const label = document.getElementById("obConnText");
-        const postConnect = document.getElementById("obPostConnect");
         const closeBtn = document.getElementById("obClose");
         if (connected) {
           dot.className = "ob-status-dot connected";
           label.textContent = "Connected!";
           label.className = "ob-status-label connected";
-          postConnect.classList.add("active");
           closeBtn.disabled = false;
         } else {
           dot.className = "ob-status-dot";
-          label.textContent = "Waiting for connection…";
+          label.textContent = "Waiting for Claude…";
           label.className = "ob-status-label";
-          postConnect.classList.remove("active");
           closeBtn.disabled = true;
         }
       }
@@ -1682,13 +1692,19 @@
       function setStatus(state) {
         const dot = document.getElementById("statusDot");
         const label = document.getElementById("statusLabel");
-        dot.className = "status-dot " + state;
-        label.className = "status-label " + state;
-        label.textContent = {
-          connected: "Connected",
-          connecting: "Connecting…",
-          disconnected: "Disconnected",
-        }[state];
+        // While auto-retrying, hold a steady "Waiting" instead of flipping
+        // between connecting and disconnected every retry (every 3s).
+        const waiting = state !== "connected" && !manuallyDisconnected;
+        const look = waiting ? "disconnected" : state;
+        dot.className = "status-dot " + look;
+        label.className = "status-label " + look;
+        label.textContent = waiting
+          ? "Waiting"
+          : {
+              connected: "Connected",
+              connecting: "Connecting…",
+              disconnected: "Disconnected",
+            }[state];
         document.getElementById("connectedView").style.display =
           state === "connected" ? "flex" : "none";
         document.getElementById("disconnectedView").style.display =
@@ -1845,6 +1861,7 @@
         if (!msg) return;
 
         if (msg.type === "onboarding-status") {
+          if (msg.file) updateBreadcrumb(msg.file, msg.page);
           if (msg.isDev) document.getElementById("devBadge").hidden = false;
           if (msg.version) {
             pluginVersion = msg.version;
