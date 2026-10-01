@@ -21,7 +21,8 @@
 
       /* ── Header ── */
       .header {
-        padding: 12px 16px;
+        height: 48px;
+        padding: 0 16px;
         border-bottom: 1px solid #2a2a2a;
         display: flex;
         align-items: center;
@@ -37,14 +38,50 @@
         font-weight: 600;
         color: #fff;
       }
+      /* ── Footer ── */
+      .footer {
+        flex-shrink: 0;
+        height: 28px;
+        /* right padding clears the 16px resize handle in the corner */
+        padding: 0 24px 4px 16px;
+        border-top: 1px solid #2a2a2a;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 10px;
+        color: #888;
+        cursor: default;
+      }
+      /* Centered on the full panel width, not between the uneven paddings.
+         top/bottom match the footer content area (4px bottom padding). */
+      .dev-badge {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 4px;
+        margin: auto 0;
+        transform: translateX(-50%);
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 4px;
+        background: #f59e0b;
+        color: #1e1e1e;
+        font-weight: 700;
+        line-height: 16px;
+        letter-spacing: 0.04em;
+      }
+      .dev-badge[hidden] {
+        visibility: hidden;
+      }
       .status-row {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
       }
       .status-dot {
-        width: 7px;
-        height: 7px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: #666;
       }
@@ -71,7 +108,7 @@
         display: none;
         background: #451a03;
         border-bottom: 1px solid #92400e;
-        padding: 10px 12px;
+        padding: 8px 12px;
         gap: 8px;
         flex-direction: column;
       }
@@ -90,11 +127,11 @@
       .page-warning-return {
         background: #92400e;
         border: none;
-        border-radius: 3px;
+        border-radius: 4px;
         color: #fde68a;
         cursor: pointer;
         font-size: 11px;
-        padding: 4px 10px;
+        padding: 4px 12px;
         flex-shrink: 0;
       }
       .page-warning-return:hover {
@@ -103,11 +140,11 @@
       .page-warning-dismiss {
         background: none;
         border: 1px solid #92400e;
-        border-radius: 3px;
+        border-radius: 4px;
         color: #a16207;
         cursor: pointer;
         font-size: 11px;
-        padding: 4px 10px;
+        padding: 4px 12px;
       }
       .page-warning-dismiss:hover {
         color: #fde68a;
@@ -116,12 +153,13 @@
 
       /* ── Breadcrumb ── */
       .breadcrumb {
-        padding: 8px 16px;
+        height: 32px;
+        padding: 0 16px;
         border-bottom: 1px solid #2a2a2a;
         background: #1a1a1a;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         min-width: 0;
         overflow: hidden;
       }
@@ -131,7 +169,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 90px;
+        max-width: 88px;
         flex-shrink: 1;
       }
       .bc-sep {
@@ -148,8 +186,9 @@
         text-overflow: ellipsis;
         background: #7c3aed22;
         border: 1px solid #7c3aed44;
-        padding: 1px 6px;
-        border-radius: 3px;
+        padding: 0 8px;
+        line-height: 18px;
+        border-radius: 4px;
       }
 
       /* ── Connected view layout ── */
@@ -198,7 +237,7 @@
       .stat-label {
         font-size: 10px;
         color: #666;
-        margin-top: 2px;
+        margin-top: 4px;
       }
       .activity-log {
         display: flex;
@@ -252,8 +291,8 @@
         border: 1px solid #3a3a3a;
         color: #555;
         font-size: 10px;
-        padding: 2px 8px;
-        border-radius: 3px;
+        padding: 4px 8px;
+        border-radius: 4px;
         cursor: pointer;
         font-family: inherit;
         opacity: 0;
@@ -315,13 +354,14 @@
 
       /* ── Disconnected state ── */
       .disconnected-body {
+        flex: 1;
         padding: 16px;
         text-align: center;
       }
       .dc-cmd {
         background: #2a2a2a;
-        padding: 2px 6px;
-        border-radius: 3px;
+        padding: 0 4px;
+        border-radius: 4px;
         font-size: 11px;
         color: #999;
         font-family: monospace;
@@ -357,7 +397,7 @@
         cursor: pointer;
         padding: 4px;
         border-radius: 4px;
-        color: #555;
+        color: #888;
         display: flex;
         align-items: center;
         position: relative;
@@ -365,7 +405,7 @@
       }
       .gear-btn:hover {
         background: #2a2a2a;
-        color: #aaa;
+        color: #ccc;
       }
       .gear-btn.active {
         color: #7c3aed;
@@ -376,7 +416,7 @@
         display: none;
         padding: 16px;
         position: absolute;
-        top: 41px;
+        top: 48px;
         left: 0;
         right: 0;
         background: #1e1e1e;
@@ -392,7 +432,7 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: #666;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         display: block;
       }
       .settings-hint {
@@ -462,8 +502,8 @@
         align-items: center;
       }
       .ob-step-dot {
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: #333;
         border: 1px solid #444;
@@ -504,7 +544,7 @@
         font-size: 14px;
         font-weight: 600;
         color: #fff;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
       }
       .ob-step-desc {
         font-size: 12px;
@@ -538,7 +578,7 @@
       .ob-check-btn {
         background: none;
         border: 1.5px solid #555;
-        border-radius: 3px;
+        border-radius: 4px;
         width: 20px;
         height: 20px;
         flex-shrink: 0;
@@ -563,7 +603,7 @@
         background: #2a2a2a;
         border: 1px solid #444;
         border-radius: 4px;
-        padding: 6px 8px;
+        padding: 8px;
         font-size: 12px;
         color: #ccc;
         display: flex;
@@ -577,7 +617,7 @@
         border: none;
         color: #555;
         cursor: pointer;
-        padding: 2px;
+        padding: 4px;
         flex-shrink: 0;
         display: flex;
         align-items: center;
@@ -629,8 +669,8 @@
         flex: 1;
       }
       .ob-status-dot {
-        width: 7px;
-        height: 7px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         background: #f59e0b;
         flex-shrink: 0;
@@ -642,7 +682,7 @@
       .ob-status-label {
         background: #2a2a2a;
         border-radius: 4px;
-        padding: 6px 8px;
+        padding: 8px;
         font-size: 12px;
         color: #888;
         flex: 1;
@@ -688,11 +728,11 @@
       .ob-prompt-copy-btn {
         background: none;
         border: 1px solid #3a3a3a;
-        border-radius: 3px;
+        border-radius: 4px;
         color: #555;
         cursor: pointer;
         font-size: 10px;
-        padding: 2px 6px;
+        padding: 4px 8px;
         flex-shrink: 0;
         margin-top: 1px;
       }
@@ -877,7 +917,7 @@
                   id="btnCopySetupCmd"
                   title="Copy command"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
                     <rect
                       x="4"
                       y="4"
@@ -988,7 +1028,7 @@
                   id="btnCopyPrompt1"
                   title="Copy prompt"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
                     <rect
                       x="4"
                       y="4"
@@ -1019,7 +1059,7 @@
                   id="btnCopyPrompt2"
                   title="Copy prompt"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
                     <rect
                       x="4"
                       y="4"
@@ -1098,8 +1138,8 @@
           <button class="gear-btn" id="collapseBtn" title="Collapse">
             <svg
               id="collapseIcon"
-              width="14"
-              height="14"
+              width="16"
+              height="16"
               viewBox="0 0 14 14"
               fill="none"
             >
@@ -1113,20 +1153,21 @@
             </svg>
           </button>
           <button class="gear-btn" id="gearBtn" title="Settings">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle
-                cx="7"
-                cy="7"
-                r="2"
-                stroke="currentColor"
-                stroke-width="1.2"
-              />
+            <!-- Gear: Lucide "settings" icon (ISC license, lucide.dev) -->
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path
-                d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.93 2.93l1.06 1.06M10.01 10.01l1.06 1.06M2.93 11.07l1.06-1.06M10.01 3.99l1.06-1.06"
-                stroke="currentColor"
-                stroke-width="1.2"
-                stroke-linecap="round"
+                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
               />
+              <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
         </div>
@@ -1144,7 +1185,8 @@
             value="3766"
           />
           <div class="settings-hint">
-            Must match <code>FIGJAM_WS_PORT</code> on the server. Default: 3766.
+            Must match <code>FIGJAM_WS_PORT</code> on the server. Default:
+            <span id="defaultPortNum">3766</span>.
           </div>
         </div>
         <div class="settings-actions">
@@ -1273,6 +1315,17 @@
             View setup guide
           </button>
         </div>
+      </div>
+      <div class="footer" id="footer">
+        <span title="ABCreativeDesign">ABCD</span>
+        <span
+          class="dev-badge"
+          id="devBadge"
+          title="Development build from the dev repo. Connects on port 3767 by default."
+          hidden
+          >DEV</span
+        >
+        <span class="footer-version" id="footerVersion" title="ClaudeJam version"></span>
       </div>
       <div class="resize-handle" id="resizeHandle">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -1692,6 +1745,15 @@
         if (!msg) return;
 
         if (msg.type === "onboarding-status") {
+          if (msg.isDev) document.getElementById("devBadge").hidden = false;
+          if (msg.version) {
+            document.getElementById("footerVersion").textContent =
+              "v" + msg.version;
+          }
+          if (msg.defaultWsPort) {
+            document.getElementById("defaultPortNum").textContent =
+              msg.defaultWsPort;
+          }
           if (msg.wsPort) {
             wsPort = msg.wsPort;
             document.getElementById("portInput").value = wsPort;
@@ -1802,6 +1864,7 @@
           icon.querySelector("path").setAttribute("d", "M3 9l4-4 4 4");
           toggleSettings(false);
           document.getElementById("gearBtn").style.display = "none";
+          document.getElementById("footer").style.display = "none";
           document.getElementById("collapseBtn").classList.add("active");
           parent.postMessage(
             {
@@ -1818,6 +1881,7 @@
           icon.querySelector("path").setAttribute("d", "M3 5l4 4 4-4");
           document.getElementById("collapseBtn").classList.remove("active");
           document.getElementById("gearBtn").style.display = "";
+          document.getElementById("footer").style.display = "";
           parent.postMessage(
             {
               pluginMessage: {

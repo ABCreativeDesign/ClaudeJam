@@ -1,23 +1,39 @@
 // claudejam/src/code.ts
 /// <reference types="@figma/plugin-typings" />
 
+// Bundled at build time by esbuild, so the panel can never show a stale version.
+import { version as PLUGIN_VERSION } from "../package.json";
+
 figma.showUI(__html__, { width: 320, height: 480, themeColors: true });
+
+// The live plugin keeps its Figma-issued ID; the dev build (imported from the
+// dev repo's manifest) has its own. Any other ID is treated as a dev build: it
+// shows a DEV badge and defaults to the dev server's port so dev and live can
+// run side by side.
+const LIVE_PLUGIN_ID = "1623785803318635174";
+const IS_DEV = figma.pluginId !== LIVE_PLUGIN_ID;
+const DEFAULT_WS_PORT = IS_DEV ? 3767 : 3766;
 
 // Send onboarding status and saved settings once UI is ready
 Promise.all([
   figma.clientStorage.getAsync("onboardingComplete"),
   figma.clientStorage.getAsync("wsPort"),
 ]).then(([onboardingComplete, wsPort]) => {
-  // Migrate stale port 3056 (old default) to 3766
+  // Migrate stale port 3056 (old default) to the current default
   const resolvedPort =
-    (wsPort as number) === 3056 ? 3766 : (wsPort as number) || 3766;
+    (wsPort as number) === 3056
+      ? DEFAULT_WS_PORT
+      : (wsPort as number) || DEFAULT_WS_PORT;
   if ((wsPort as number) === 3056) {
-    figma.clientStorage.setAsync("wsPort", 3766);
+    figma.clientStorage.setAsync("wsPort", DEFAULT_WS_PORT);
   }
   figma.ui.postMessage({
     type: "onboarding-status",
     complete: !!onboardingComplete,
     wsPort: resolvedPort,
+    isDev: IS_DEV,
+    defaultWsPort: DEFAULT_WS_PORT,
+    version: PLUGIN_VERSION,
   });
 });
 

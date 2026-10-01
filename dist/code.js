@@ -17,6 +17,9 @@
       }
     return a;
   };
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
@@ -41,22 +44,37 @@
     });
   };
 
+  // package.json
+  var version;
+  var init_package = __esm({
+    "package.json"() {
+      version = "1.5.3";
+    }
+  });
+
   // src/code.ts
   var require_code = __commonJS({
     "src/code.ts"(exports) {
+      init_package();
       figma.showUI(__html__, { width: 320, height: 480, themeColors: true });
+      var LIVE_PLUGIN_ID = "1623785803318635174";
+      var IS_DEV = figma.pluginId !== LIVE_PLUGIN_ID;
+      var DEFAULT_WS_PORT = IS_DEV ? 3767 : 3766;
       Promise.all([
         figma.clientStorage.getAsync("onboardingComplete"),
         figma.clientStorage.getAsync("wsPort")
       ]).then(([onboardingComplete, wsPort]) => {
-        const resolvedPort = wsPort === 3056 ? 3766 : wsPort || 3766;
+        const resolvedPort = wsPort === 3056 ? DEFAULT_WS_PORT : wsPort || DEFAULT_WS_PORT;
         if (wsPort === 3056) {
-          figma.clientStorage.setAsync("wsPort", 3766);
+          figma.clientStorage.setAsync("wsPort", DEFAULT_WS_PORT);
         }
         figma.ui.postMessage({
           type: "onboarding-status",
           complete: !!onboardingComplete,
-          wsPort: resolvedPort
+          wsPort: resolvedPort,
+          isDev: IS_DEV,
+          defaultWsPort: DEFAULT_WS_PORT,
+          version
         });
       });
       var claudeTargetPageId = null;
