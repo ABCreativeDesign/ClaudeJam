@@ -58,6 +58,19 @@
         align-items: center;
         gap: 8px;
       }
+      .footer-version {
+        background: none;
+        border: none;
+        padding: 0;
+        height: 16px;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      .footer-version:hover {
+        color: #ccc;
+        text-decoration: underline;
+      }
       .footer-cta {
         background: none;
         border: none;
@@ -1380,7 +1393,7 @@
           >
             Update needed
           </button>
-          <span class="footer-version" id="footerVersion" title="ClaudeJam version"></span>
+          <button class="footer-version" id="footerVersion" title="Open ClaudeJam on GitHub"></button>
         </span>
       </div>
       <div class="resize-handle" id="resizeHandle">
@@ -1409,9 +1422,11 @@
         const banner = document.getElementById("versionWarningBanner");
         const footer = document.getElementById("footerVersion");
         if (!pluginVersion || serverVersion === null) return;
-        footer.title = serverVersion
-          ? `Plugin v${pluginVersion} · Server v${serverVersion}`
-          : `Plugin v${pluginVersion} · Server older than v1.5.5`;
+        footer.title =
+          (serverVersion
+            ? `Plugin v${pluginVersion} · Server v${serverVersion}`
+            : `Plugin v${pluginVersion} · Server older than v1.5.5`) +
+          ". Click to open ClaudeJam on GitHub.";
         if (serverVersion === pluginVersion) {
           banner.classList.remove("visible");
           document.getElementById("versionCta").hidden = true;
@@ -1992,6 +2007,13 @@
             .classList.remove("visible");
           document.getElementById("versionCta").hidden = false;
         });
+
+      document.getElementById("footerVersion").addEventListener("click", () => {
+        parent.postMessage(
+          { pluginMessage: { type: "open-external", url: REPO_URL } },
+          "*",
+        );
+      });
 
       document.getElementById("versionCta").addEventListener("click", () => {
         document.getElementById("versionCta").hidden = true;
