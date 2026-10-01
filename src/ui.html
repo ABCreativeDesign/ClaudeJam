@@ -1,0 +1,1958 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+        background: #1e1e1e;
+        color: #ccc;
+        overflow: clip;
+      }
+
+      /* ── Header ── */
+      .header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #2a2a2a;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .header-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .status-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #666;
+      }
+      .status-dot.connected {
+        background: #22c55e;
+        box-shadow: 0 0 6px #22c55e88;
+      }
+      .status-dot.connecting {
+        background: #f59e0b;
+      }
+      .status-label {
+        font-size: 11px;
+        color: #666;
+      }
+      .status-label.connected {
+        color: #22c55e;
+      }
+      .status-label.connecting {
+        color: #f59e0b;
+      }
+
+      /* ── Page warning banner ── */
+      .page-warning-banner {
+        display: none;
+        background: #451a03;
+        border-bottom: 1px solid #92400e;
+        padding: 10px 12px;
+        gap: 8px;
+        flex-direction: column;
+      }
+      .page-warning-banner.visible {
+        display: flex;
+      }
+      .page-warning-text {
+        font-size: 11px;
+        color: #fde68a;
+        line-height: 1.5;
+      }
+      .page-warning-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .page-warning-return {
+        background: #92400e;
+        border: none;
+        border-radius: 3px;
+        color: #fde68a;
+        cursor: pointer;
+        font-size: 11px;
+        padding: 4px 10px;
+        flex-shrink: 0;
+      }
+      .page-warning-return:hover {
+        background: #b45309;
+      }
+      .page-warning-dismiss {
+        background: none;
+        border: 1px solid #92400e;
+        border-radius: 3px;
+        color: #a16207;
+        cursor: pointer;
+        font-size: 11px;
+        padding: 4px 10px;
+      }
+      .page-warning-dismiss:hover {
+        color: #fde68a;
+        border-color: #b45309;
+      }
+
+      /* ── Breadcrumb ── */
+      .breadcrumb {
+        padding: 8px 16px;
+        border-bottom: 1px solid #2a2a2a;
+        background: #1a1a1a;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .bc-file {
+        font-size: 11px;
+        color: #555;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 90px;
+        flex-shrink: 1;
+      }
+      .bc-sep {
+        font-size: 10px;
+        color: #444;
+        flex-shrink: 0;
+      }
+      .bc-page {
+        font-size: 11px;
+        color: #ccc;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #7c3aed22;
+        border: 1px solid #7c3aed44;
+        padding: 1px 6px;
+        border-radius: 3px;
+      }
+
+      /* ── Connected view layout ── */
+      #connectedView {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .section-activity {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      /* ── Sections / stats / activity ── */
+      .section {
+        padding: 12px 16px;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .section-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #666;
+        margin-bottom: 8px;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+      }
+      .stat-card {
+        background: #2a2a2a;
+        border-radius: 4px;
+        padding: 8px;
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: #fff;
+        line-height: 1;
+      }
+      .stat-label {
+        font-size: 10px;
+        color: #666;
+        margin-top: 2px;
+      }
+      .activity-log {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-height: 48px;
+        flex: 1;
+        overflow-y: auto;
+      }
+      .activity-entry {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 8px;
+        background: #252525;
+        border-radius: 4px;
+      }
+      .activity-icon {
+        font-size: 11px;
+        margin-top: 1px;
+        flex-shrink: 0;
+      }
+      .activity-icon.create {
+        color: #22c55e;
+      }
+      .activity-icon.connect {
+        color: #7c3aed;
+      }
+      .activity-icon.edit {
+        color: #f59e0b;
+      }
+      .activity-icon.delete {
+        color: #ef4444;
+      }
+      .activity-text {
+        font-size: 11px;
+        color: #ccc;
+        line-height: 1.4;
+      }
+      .activity-name {
+        color: #fff;
+      }
+      .activity-empty {
+        font-size: 11px;
+        color: #444;
+        padding: 8px;
+        text-align: center;
+      }
+      .activity-copy-btn {
+        background: none;
+        border: 1px solid #3a3a3a;
+        color: #555;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-family: inherit;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      #activitySection:hover .activity-copy-btn {
+        opacity: 1;
+      }
+      .activity-copy-btn:hover {
+        color: #aaa;
+        border-color: #555;
+      }
+      .activity-copy-btn.copied {
+        color: #22c55e;
+        border-color: #22c55e44;
+        opacity: 1;
+      }
+
+      /* ── Controls ── */
+      .controls {
+        padding: 12px 16px 16px;
+        display: flex;
+        gap: 8px;
+      }
+      .btn {
+        flex: 1;
+        background: #2a2a2a;
+        border: 1px solid #3a3a3a;
+        color: #ccc;
+        font-size: 11px;
+        padding: 8px 0;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn:hover {
+        background: #333;
+      }
+      .btn.danger {
+        color: #ef4444;
+      }
+      .btn.primary {
+        background: #7c3aed;
+        border-color: #7c3aed;
+        color: #fff;
+      }
+      .btn.primary:hover {
+        background: #6d28d9;
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      .btn.full {
+        flex: none;
+        width: 100%;
+      }
+
+      /* ── Disconnected state ── */
+      .disconnected-body {
+        padding: 16px;
+        text-align: center;
+      }
+      .dc-cmd {
+        background: #2a2a2a;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        color: #999;
+        font-family: monospace;
+      }
+      .retry-note {
+        font-size: 11px;
+        color: #444;
+        margin-top: 8px;
+      }
+
+      /* ── Resize handle ── */
+      .resize-handle {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 16px;
+        height: 16px;
+        cursor: nwse-resize;
+        opacity: 0.3;
+        z-index: 51;
+      }
+      .resize-handle:hover {
+        opacity: 0.7;
+      }
+      .resize-handle svg {
+        display: block;
+      }
+
+      /* ── Gear button ── */
+      .gear-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        color: #555;
+        display: flex;
+        align-items: center;
+        position: relative;
+        z-index: 51;
+      }
+      .gear-btn:hover {
+        background: #2a2a2a;
+        color: #aaa;
+      }
+      .gear-btn.active {
+        color: #7c3aed;
+      }
+
+      /* ── Settings panel ── */
+      #settingsPanel {
+        display: none;
+        padding: 16px;
+        position: absolute;
+        top: 41px;
+        left: 0;
+        right: 0;
+        background: #1e1e1e;
+        border-bottom: 1px solid #2a2a2a;
+        z-index: 50;
+        box-shadow: 0 8px 24px #00000066;
+      }
+      .settings-field {
+        margin-bottom: 16px;
+      }
+      .settings-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #666;
+        margin-bottom: 6px;
+        display: block;
+      }
+      .settings-hint {
+        font-size: 10px;
+        color: #555;
+        margin-top: 4px;
+        line-height: 1.4;
+      }
+      .settings-input {
+        width: 100%;
+        background: #2a2a2a;
+        border: 1px solid #3a3a3a;
+        color: #fff;
+        font-size: 12px;
+        padding: 8px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+      .settings-input:focus {
+        outline: none;
+        border-color: #7c3aed;
+      }
+      .settings-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btn.disconnect {
+        color: #ef4444;
+        border-color: #ef444422;
+      }
+      .btn.disconnect:hover {
+        background: #ef444411;
+      }
+
+      /* ── Onboarding overlay ── */
+      #onboarding {
+        position: fixed;
+        inset: 0;
+        background: #1e1e1e;
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+        overflow-y: auto;
+      }
+      .ob-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #2a2a2a;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .ob-header-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ob-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .ob-steps {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+      .ob-step-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #333;
+        border: 1px solid #444;
+        transition: background 0.2s;
+      }
+      .ob-step-dot.active {
+        background: #7c3aed;
+        border-color: #7c3aed;
+      }
+      .ob-step-dot.done {
+        background: #22c55e;
+        border-color: #22c55e;
+      }
+
+      .ob-body {
+        flex: 1;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ob-welcome-card {
+        background: #1e1e1e;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .ob-step-card {
+        background: #1e1e1e;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ob-step-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 2px;
+      }
+      .ob-step-desc {
+        font-size: 12px;
+        color: #888;
+        line-height: 1.6;
+      }
+      .ob-section-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #ccc;
+        margin-bottom: 4px;
+      }
+
+      /* ── Checkbox rows ── */
+      .ob-check-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #282828;
+        border-radius: 4px;
+        padding: 4px;
+        gap: 8px;
+      }
+      .ob-check-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+      }
+      .ob-check-btn {
+        background: none;
+        border: 1.5px solid #555;
+        border-radius: 3px;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: transparent;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .ob-check-btn:hover {
+        border-color: #888;
+      }
+      .ob-check-btn.checked {
+        background: #22c55e;
+        border-color: #22c55e;
+        color: #fff;
+      }
+      .ob-check-label {
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 6px 8px;
+        font-size: 12px;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+      }
+      .ob-cmd-copy-btn {
+        background: none;
+        border: none;
+        color: #555;
+        cursor: pointer;
+        padding: 2px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+      }
+      .ob-cmd-copy-btn:hover {
+        color: #aaa;
+      }
+      .ob-cmd-copy-btn.copied {
+        color: #22c55e;
+      }
+      .ob-help-btn {
+        background: none;
+        border: 1px solid #555;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        cursor: pointer;
+        font-size: 11px;
+        color: #aaa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: inherit;
+      }
+      .ob-help-btn:hover {
+        color: #ccc;
+        border-color: #888;
+      }
+      .ob-check-row.disabled {
+        opacity: 0.35;
+        pointer-events: none;
+      }
+
+      /* ── Connection status row ── */
+      .ob-status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        background: #282828;
+        border-radius: 4px;
+        padding: 4px;
+      }
+      .ob-status-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+      }
+      .ob-status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f59e0b;
+        flex-shrink: 0;
+      }
+      .ob-status-dot.connected {
+        background: #22c55e;
+        box-shadow: 0 0 6px #22c55e88;
+      }
+      .ob-status-label {
+        background: #2a2a2a;
+        border-radius: 4px;
+        padding: 6px 8px;
+        font-size: 12px;
+        color: #888;
+        flex: 1;
+      }
+      .ob-status-label.connected {
+        color: #22c55e;
+      }
+
+      /* ── Post-connection content ── */
+      .ob-post-connect {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        opacity: 0.3;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .ob-post-connect.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .ob-prompts-box {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ob-prompt-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 8px 12px;
+      }
+      .ob-prompt-text {
+        font-size: 12px;
+        color: #ccc;
+        line-height: 1.5;
+        flex: 1;
+        min-width: 0;
+      }
+      .ob-prompt-copy-btn {
+        background: none;
+        border: 1px solid #3a3a3a;
+        border-radius: 3px;
+        color: #555;
+        cursor: pointer;
+        font-size: 10px;
+        padding: 2px 6px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .ob-prompt-copy-btn:hover {
+        color: #aaa;
+        border-color: #555;
+      }
+      .ob-prompt-copy-btn.copied {
+        color: #22c55e;
+        border-color: #22c55e44;
+      }
+
+      /* ── Footer ── */
+      .ob-footer {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .ob-link {
+        background: none;
+        border: none;
+        color: #555;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: inherit;
+        text-decoration: underline;
+        text-align: center;
+        padding: 4px;
+      }
+      .ob-link:hover {
+        color: #888;
+      }
+      /* When onboarding is launched from Settings, swap cancel for return */
+      #onboarding.from-settings .ob-cancel-btn {
+        display: none;
+      }
+      #onboarding.from-settings .ob-return-btn {
+        display: block;
+      }
+      .ob-return-btn {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Onboarding overlay ────────────────────────────────────────────── -->
+    <div id="onboarding" style="display: none">
+      <div class="ob-header">
+        <div class="ob-header-left">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect width="16" height="16" rx="3" fill="#7C3AED" />
+            <path
+              d="M4 8h8M8 4v8"
+              stroke="white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span class="ob-title">ClaudeJam</span>
+        </div>
+        <div class="ob-steps">
+          <div class="ob-step-dot active" id="obDot1"></div>
+          <div class="ob-step-dot" id="obDot2"></div>
+          <div class="ob-step-dot" id="obDot3"></div>
+        </div>
+      </div>
+
+      <!-- Step 1: Requirements -->
+      <div id="obStep1" class="ob-body">
+        <div class="ob-welcome-card">
+          <div class="ob-step-title">Welcome to ClaudeJam</div>
+          <div class="ob-step-desc">
+            Work with your Claude Code agent directly inside FigJam. Think
+            through ideas, map out flows, and build boards together in real
+            time.
+          </div>
+        </div>
+        <div class="ob-step-card">
+          <div class="ob-step-title">Step 1: Requirements</div>
+          <div class="ob-step-desc">
+            This plugin requires Claude Code and Node.js. Please install both
+            before continuing.
+          </div>
+          <div class="ob-section-label" style="margin-top: 4px">
+            I have installed:
+          </div>
+          <div class="ob-check-row">
+            <div class="ob-check-left">
+              <button
+                class="ob-check-btn"
+                id="btnCheckCC"
+                title="Mark as installed"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <div class="ob-check-label">Claude Code</div>
+            </div>
+            <button class="ob-help-btn" id="btnHelpCC" title="Get Claude Code">
+              ?
+            </button>
+          </div>
+          <div class="ob-check-row">
+            <div class="ob-check-left">
+              <button
+                class="ob-check-btn"
+                id="btnCheckNode"
+                title="Mark as installed"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <div class="ob-check-label">Node.js</div>
+            </div>
+            <button class="ob-help-btn" id="btnHelpNode" title="Get Node.js">
+              ?
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="obFooter1" class="ob-footer">
+        <button class="btn primary full" id="obToStep2" disabled>Step 2</button>
+        <button class="ob-link ob-cancel-btn" id="obCancel1">
+          Cancel and close the plugin.
+        </button>
+        <button class="ob-link ob-return-btn" id="obReturn1">
+          Close Onboarding
+        </button>
+      </div>
+
+      <!-- Step 2: Install MCP Server -->
+      <div id="obStep2" class="ob-body" style="display: none">
+        <div class="ob-step-card">
+          <div class="ob-step-title">Step 2: Install MCP Server</div>
+          <div class="ob-step-desc">
+            Open a terminal in your Claude Code project directory. Then run the
+            following command.
+          </div>
+          <div class="ob-section-label" style="margin-top: 4px">
+            I have run:
+          </div>
+          <div class="ob-check-row">
+            <div class="ob-check-left">
+              <button
+                class="ob-check-btn"
+                id="btnCheckSetup"
+                title="Mark as done"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <div
+                class="ob-check-label"
+                style="font-family: monospace; font-size: 11px"
+              >
+                npx claudejam setup
+                <button
+                  class="ob-cmd-copy-btn"
+                  id="btnCopySetupCmd"
+                  title="Copy command"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <rect
+                      x="4"
+                      y="4"
+                      width="8"
+                      height="8"
+                      rx="1"
+                      stroke="currentColor"
+                      stroke-width="1.2"
+                    />
+                    <path
+                      d="M2 10V2h8"
+                      stroke="currentColor"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button
+              class="ob-help-btn"
+              id="btnHelpSetup"
+              title="Help with setup command"
+            >
+              ?
+            </button>
+          </div>
+          <div class="ob-section-label" style="margin-top: 4px">I have:</div>
+          <div class="ob-check-row disabled" id="obRestartRow">
+            <div class="ob-check-left">
+              <button
+                class="ob-check-btn"
+                id="btnCheckRestart"
+                title="Mark as done"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <div class="ob-check-label">Restarted Claude Code.</div>
+            </div>
+            <button
+              class="ob-help-btn"
+              id="btnHelpRestart"
+              title="Why restart Claude Code?"
+            >
+              ?
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="obFooter2" class="ob-footer" style="display: none">
+        <button class="btn primary full" id="obToStep3" disabled>Step 3</button>
+        <button class="ob-link" id="obBack2">Back to Step 1</button>
+        <button class="ob-link ob-cancel-btn" id="obCancel2">
+          Cancel and close the plugin.
+        </button>
+        <button class="ob-link ob-return-btn" id="obReturn2">
+          Close Onboarding
+        </button>
+      </div>
+
+      <!-- Step 3: Send a Message -->
+      <div id="obStep3" class="ob-body" style="display: none">
+        <div class="ob-step-card">
+          <div class="ob-step-title">Step 3: Send a Message</div>
+          <div class="ob-step-desc">
+            Send Claude Code any message so the plugin can connect.
+          </div>
+          <div class="ob-status-row" style="margin-top: 4px">
+            <div class="ob-status-left">
+              <div class="ob-status-dot" id="obConnDot"></div>
+              <div class="ob-status-label" id="obConnText">
+                Waiting for connection…
+              </div>
+            </div>
+            <button
+              class="ob-help-btn"
+              id="btnHelpConn"
+              title="Why is it waiting?"
+            >
+              ?
+            </button>
+          </div>
+          <div class="ob-post-connect" id="obPostConnect">
+            <div class="ob-section-label" style="margin-top: 4px">
+              Connection established
+            </div>
+            <div class="ob-step-desc">
+              Head back to Claude Code and send a message to get started. Not
+              sure what to say? Try one of these:
+            </div>
+            <div class="ob-prompts-box">
+              <div class="ob-prompt-item">
+                <span class="ob-prompt-text"
+                  >I need to map out our SaaS onboarding flow but I'm not sure
+                  where to start. Can you help me think through it on the open
+                  FigJam board?</span
+                >
+                <button
+                  class="ob-prompt-copy-btn"
+                  id="btnCopyPrompt1"
+                  title="Copy prompt"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <rect
+                      x="4"
+                      y="4"
+                      width="8"
+                      height="8"
+                      rx="1"
+                      stroke="currentColor"
+                      stroke-width="1.2"
+                    />
+                    <path
+                      d="M2 10V2h8"
+                      stroke="currentColor"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div class="ob-prompt-item">
+                <span class="ob-prompt-text"
+                  >I want to do a competitive analysis — I'm thinking three
+                  competitors across pricing, features, and support. Does that
+                  structure make sense, or would you change anything before we
+                  build it?</span
+                >
+                <button
+                  class="ob-prompt-copy-btn"
+                  id="btnCopyPrompt2"
+                  title="Copy prompt"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <rect
+                      x="4"
+                      y="4"
+                      width="8"
+                      height="8"
+                      rx="1"
+                      stroke="currentColor"
+                      stroke-width="1.2"
+                    />
+                    <path
+                      d="M2 10V2h8"
+                      stroke="currentColor"
+                      stroke-width="1.2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="obFooter3" class="ob-footer" style="display: none">
+        <button class="btn primary full" id="obClose" disabled>
+          Close Onboarding Experience
+        </button>
+        <button class="ob-link" id="obBack3">Back to Step 2</button>
+        <button class="ob-link ob-cancel-btn" id="obCancel3">
+          Cancel and close the plugin.
+        </button>
+        <button class="ob-link ob-return-btn" id="obReturn3">
+          Close Onboarding
+        </button>
+      </div>
+      <div class="resize-handle" id="obResizeHandle">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M5 13l8-8M9 13l4-4"
+            stroke="#888"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- ── Main plugin UI ────────────────────────────────────────────────── -->
+    <div
+      id="mainUI"
+      style="
+        display: none;
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+        flex-direction: column;
+      "
+    >
+      <div class="header">
+        <div class="header-left">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect width="16" height="16" rx="3" fill="#7C3AED" />
+            <path
+              d="M4 8h8M8 4v8"
+              stroke="white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span class="header-title">ClaudeJam</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div class="status-row">
+            <span class="status-dot" id="statusDot"></span>
+            <span class="status-label" id="statusLabel">Disconnected</span>
+          </div>
+          <button class="gear-btn" id="collapseBtn" title="Collapse">
+            <svg
+              id="collapseIcon"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M3 5l4 4 4-4"
+                stroke="currentColor"
+                stroke-width="1.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="gear-btn" id="gearBtn" title="Settings">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle
+                cx="7"
+                cy="7"
+                r="2"
+                stroke="currentColor"
+                stroke-width="1.2"
+              />
+              <path
+                d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.93 2.93l1.06 1.06M10.01 10.01l1.06 1.06M2.93 11.07l1.06-1.06M10.01 3.99l1.06-1.06"
+                stroke="currentColor"
+                stroke-width="1.2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="settingsPanel">
+        <div class="settings-field">
+          <label class="settings-label" for="portInput">WebSocket Port</label>
+          <input
+            class="settings-input"
+            type="number"
+            id="portInput"
+            min="1024"
+            max="65535"
+            value="3766"
+          />
+          <div class="settings-hint">
+            Must match <code>FIGJAM_WS_PORT</code> on the server. Default: 3766.
+          </div>
+        </div>
+        <div class="settings-actions">
+          <button class="btn full" id="btnApplyPort">Apply</button>
+          <button class="btn full primary" id="btnConnectToggle">
+            Connect to server
+          </button>
+          <button class="btn full" id="btnRestartOnboarding">
+            Restart Onboarding
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="settingsBackdrop"
+        style="
+          display: none;
+          position: absolute;
+          inset: 0;
+          background: #000000bb;
+          z-index: 49;
+        "
+      ></div>
+
+      <div class="breadcrumb">
+        <span class="bc-file" id="bcFile" title="">—</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-page" id="bcPage">—</span>
+      </div>
+
+      <div class="page-warning-banner" id="pageWarningBanner">
+        <div class="page-warning-text" id="pageWarningText"></div>
+        <div class="page-warning-actions">
+          <button class="page-warning-return" id="pageWarningReturn">
+            Return to page
+          </button>
+          <button class="page-warning-dismiss" id="pageWarningDismiss">
+            Dismiss
+          </button>
+        </div>
+      </div>
+
+      <div id="connectedView" style="display: none">
+        <div class="section">
+          <div class="section-label">Board</div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="statNodes">0</div>
+              <div class="stat-label">nodes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statConnectors">0</div>
+              <div class="stat-label">connectors</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statSections">0</div>
+              <div class="stat-label">sections</div>
+            </div>
+          </div>
+        </div>
+        <div class="section section-activity" id="activitySection">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 8px;
+            "
+          >
+            <div class="section-label" style="margin-bottom: 0">
+              Recent activity
+            </div>
+            <button class="activity-copy-btn" id="btnCopyActivity">Copy</button>
+          </div>
+          <div class="activity-log" id="activityLog">
+            <div class="activity-empty">No activity yet</div>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="btnFit">Fit to board</button>
+          <button class="btn danger" id="btnClear">Clear board…</button>
+        </div>
+      </div>
+
+      <div id="disconnectedView" class="disconnected-body">
+        <div
+          id="dcAutoMsg"
+          style="
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 12px;
+          "
+        >
+          Send a message in <span class="dc-cmd">Claude Code</span> to start the
+          server, then it will connect automatically.
+        </div>
+        <div
+          id="dcWrongPort"
+          style="
+            display: none;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 12px;
+          "
+        >
+          Server is running but not on port <span id="dcPortNum">3766</span>.
+          Check the port in <strong style="color: #aaa">Settings</strong>.
+        </div>
+        <div
+          id="dcManualMsg"
+          style="
+            display: none;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 12px;
+          "
+        >
+          Manually disconnected.
+        </div>
+        <div id="dcAutoRetry" class="retry-note">Retrying every 3s…</div>
+        <div style="margin-top: 16px">
+          <button class="ob-link" id="btnReplayOnboarding" style="color: #555">
+            View setup guide
+          </button>
+        </div>
+      </div>
+      <div class="resize-handle" id="resizeHandle">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M5 13l8-8M9 13l4-4"
+            stroke="#888"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <script>
+      let wsPort = 3766;
+      const REPO_URL =
+        "https://github.com/ABCreativeDesign/ClaudeJam";
+      const TEST_PROMPT =
+        "Read this FigJam board and give me a summary of what's on it.";
+      const MAX_ACTIVITY = 50;
+
+      let ws = null;
+      let activityLog = [];
+      let onboardingStep = 1;
+      let onboardingDone = false;
+      let isConnected = false;
+      let manuallyDisconnected = false;
+      let settingsOpen = false;
+
+      // ── Onboarding ──────────────────────────────────────────────────────────
+
+      // Checkbox state
+      const obChecks = { cc: false, node: false, setup: false, restart: false };
+
+      function closePlugin() {
+        parent.postMessage({ pluginMessage: { type: "close-plugin" } }, "*");
+      }
+
+      function showOnboarding(step, fromSettings = false) {
+        const ob = document.getElementById("onboarding");
+        ob.style.display = "flex";
+        ob.classList.toggle("from-settings", fromSettings);
+        document.getElementById("mainUI").style.display = "none";
+        onboardingStep = step;
+        goToStep(step);
+        const minH = 500;
+        if (pluginH < minH) {
+          pluginH = minH;
+          parent.postMessage(
+            { pluginMessage: { type: "resize", width: pluginW, height: minH } },
+            "*",
+          );
+        }
+      }
+
+      function hideOnboarding() {
+        document.getElementById("onboarding").style.display = "none";
+        document.getElementById("mainUI").style.display = "flex";
+        onboardingDone = true;
+        parent.postMessage(
+          { pluginMessage: { type: "set-onboarding-complete" } },
+          "*",
+        );
+      }
+
+      function goToStep(n) {
+        [1, 2, 3].forEach((i) => {
+          document.getElementById("obStep" + i).style.display =
+            i === n ? "flex" : "none";
+          document.getElementById("obFooter" + i).style.display =
+            i === n ? "flex" : "none";
+          const dot = document.getElementById("obDot" + i);
+          dot.className =
+            "ob-step-dot" + (i < n ? " done" : i === n ? " active" : "");
+        });
+        onboardingStep = n;
+        // If arriving at step 3 already connected, update immediately
+        if (n === 3 && isConnected) {
+          setTimeout(() => updateOnboardingConnection(true), 300);
+        }
+      }
+
+      // ── Step 1 checkboxes ──
+      function toggleCheck(key, btnId, gateFn) {
+        obChecks[key] = !obChecks[key];
+        document
+          .getElementById(btnId)
+          .classList.toggle("checked", obChecks[key]);
+        gateFn();
+      }
+
+      function updateStep1Gate() {
+        document.getElementById("obToStep2").disabled = !(
+          obChecks.cc && obChecks.node
+        );
+      }
+
+      function updateStep2Gate() {
+        document
+          .getElementById("obRestartRow")
+          .classList.toggle("disabled", !obChecks.setup);
+        document.getElementById("obToStep3").disabled = !(
+          obChecks.setup && obChecks.restart
+        );
+      }
+
+      document
+        .getElementById("btnCheckCC")
+        .addEventListener("click", () =>
+          toggleCheck("cc", "btnCheckCC", updateStep1Gate),
+        );
+      document
+        .getElementById("btnCheckNode")
+        .addEventListener("click", () =>
+          toggleCheck("node", "btnCheckNode", updateStep1Gate),
+        );
+      document
+        .getElementById("btnCheckSetup")
+        .addEventListener("click", () =>
+          toggleCheck("setup", "btnCheckSetup", updateStep2Gate),
+        );
+      document
+        .getElementById("btnCheckRestart")
+        .addEventListener("click", () =>
+          toggleCheck("restart", "btnCheckRestart", updateStep2Gate),
+        );
+
+      // ── Help buttons ──
+      document.getElementById("btnHelpCC").addEventListener("click", () => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "open-external",
+              url: "https://claude.ai/download",
+            },
+          },
+          "*",
+        );
+      });
+      document.getElementById("btnHelpNode").addEventListener("click", () => {
+        parent.postMessage(
+          {
+            pluginMessage: { type: "open-external", url: "https://nodejs.org" },
+          },
+          "*",
+        );
+      });
+      document.getElementById("btnHelpSetup").addEventListener("click", () => {
+        parent.postMessage(
+          { pluginMessage: { type: "open-external", url: REPO_URL } },
+          "*",
+        );
+      });
+      document
+        .getElementById("btnHelpRestart")
+        .addEventListener("click", () => {
+          parent.postMessage(
+            { pluginMessage: { type: "open-external", url: REPO_URL } },
+            "*",
+          );
+        });
+      document.getElementById("btnHelpConn").addEventListener("click", () => {
+        parent.postMessage(
+          { pluginMessage: { type: "open-external", url: REPO_URL } },
+          "*",
+        );
+      });
+
+      // ── Copy setup command ──
+      document
+        .getElementById("btnCopySetupCmd")
+        .addEventListener("click", (e) => {
+          e.stopPropagation(); // don't toggle the checkbox
+          const btn = document.getElementById("btnCopySetupCmd");
+          navigator.clipboard.writeText("npx claudejam setup").then(() => {
+            btn.classList.add("copied");
+            setTimeout(() => btn.classList.remove("copied"), 2000);
+          });
+        });
+
+      // ── Copy example prompts ──
+      [
+        {
+          id: "btnCopyPrompt1",
+          text: "I need to map out our SaaS onboarding flow but I'm not sure where to start. Can you help me think through it on the open FigJam board?",
+        },
+        {
+          id: "btnCopyPrompt2",
+          text: "I want to do a competitive analysis — I'm thinking three competitors across pricing, features, and support. Does that structure make sense, or would you change anything before we build it?",
+        },
+      ].forEach(({ id, text }) => {
+        document.getElementById(id).addEventListener("click", () => {
+          const btn = document.getElementById(id);
+          navigator.clipboard.writeText(text).then(() => {
+            btn.classList.add("copied");
+            setTimeout(() => btn.classList.remove("copied"), 2000);
+          });
+        });
+      });
+
+      // ── Navigation ──
+      document
+        .getElementById("obToStep2")
+        .addEventListener("click", () => goToStep(2));
+      document
+        .getElementById("obToStep3")
+        .addEventListener("click", () => goToStep(3));
+      document
+        .getElementById("obBack2")
+        .addEventListener("click", () => goToStep(1));
+      document
+        .getElementById("obBack3")
+        .addEventListener("click", () => goToStep(2));
+      document
+        .getElementById("obClose")
+        .addEventListener("click", hideOnboarding);
+      document
+        .getElementById("obCancel1")
+        .addEventListener("click", closePlugin);
+      document
+        .getElementById("obCancel2")
+        .addEventListener("click", closePlugin);
+      document
+        .getElementById("obCancel3")
+        .addEventListener("click", closePlugin);
+
+      // Replay onboarding from disconnected state (not from settings)
+      document
+        .getElementById("btnReplayOnboarding")
+        .addEventListener("click", () => showOnboarding(1, false));
+
+      // Restart onboarding from settings panel
+      document
+        .getElementById("btnRestartOnboarding")
+        .addEventListener("click", () => {
+          toggleSettings(false);
+          showOnboarding(1, true);
+        });
+
+      // Return buttons (settings-triggered onboarding only)
+      ["obReturn1", "obReturn2", "obReturn3"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", hideOnboarding);
+      });
+
+      // Update step 3 connection status
+      function updateOnboardingConnection(connected) {
+        const dot = document.getElementById("obConnDot");
+        const label = document.getElementById("obConnText");
+        const postConnect = document.getElementById("obPostConnect");
+        const closeBtn = document.getElementById("obClose");
+        if (connected) {
+          dot.className = "ob-status-dot connected";
+          label.textContent = "Connected!";
+          label.className = "ob-status-label connected";
+          postConnect.classList.add("active");
+          closeBtn.disabled = false;
+        } else {
+          dot.className = "ob-status-dot";
+          label.textContent = "Waiting for connection…";
+          label.className = "ob-status-label";
+          postConnect.classList.remove("active");
+          closeBtn.disabled = true;
+        }
+      }
+
+      // ── Main UI ─────────────────────────────────────────────────────────────
+
+      function setStatus(state) {
+        const dot = document.getElementById("statusDot");
+        const label = document.getElementById("statusLabel");
+        dot.className = "status-dot " + state;
+        label.className = "status-label " + state;
+        label.textContent = {
+          connected: "Connected",
+          connecting: "Connecting…",
+          disconnected: "Disconnected",
+        }[state];
+        document.getElementById("connectedView").style.display =
+          state === "connected" ? "flex" : "none";
+        document.getElementById("disconnectedView").style.display =
+          state === "connected" ? "none" : "block";
+        isConnected = state === "connected";
+        updateConnectToggle(isConnected);
+      }
+
+      function updateBreadcrumb(file, page) {
+        const f = document.getElementById("bcFile");
+        f.textContent = file || "—";
+        f.title = file || "";
+        document.getElementById("bcPage").textContent = page || "—";
+      }
+
+      function updateStats(nodes) {
+        document.getElementById("statNodes").textContent = nodes.filter(
+          (n) => n.type !== "CONNECTOR" && n.type !== "SECTION",
+        ).length;
+        document.getElementById("statConnectors").textContent = nodes.filter(
+          (n) => n.type === "CONNECTOR",
+        ).length;
+        document.getElementById("statSections").textContent = nodes.filter(
+          (n) => n.type === "SECTION",
+        ).length;
+      }
+
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function pushActivity(icon, iconClass, text) {
+        activityLog.push({
+          icon: escHtml(icon),
+          iconClass: escHtml(iconClass),
+          text,
+        });
+        if (activityLog.length > MAX_ACTIVITY) activityLog.shift();
+        const log = document.getElementById("activityLog");
+        log.innerHTML =
+          activityLog.length === 0
+            ? '<div class="activity-empty">No activity yet</div>'
+            : activityLog
+                .map(
+                  (e) =>
+                    `<div class="activity-entry">
+                <span class="activity-icon ${e.iconClass}">${e.icon}</span>
+                <span class="activity-text">${e.text}</span>
+              </div>`,
+                )
+                .join("");
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function updateConnectToggle(connected) {
+        const btn = document.getElementById("btnConnectToggle");
+        if (connected) {
+          btn.textContent = "Disconnect from server";
+          btn.className = "btn full disconnect";
+        } else {
+          btn.textContent = "Connect to server";
+          btn.className = "btn full primary";
+        }
+      }
+
+      function setDisconnectedState(manual) {
+        manuallyDisconnected = manual;
+        document.getElementById("dcAutoMsg").style.display = "none";
+        document.getElementById("dcWrongPort").style.display = "none";
+        document.getElementById("dcManualMsg").style.display = manual
+          ? "block"
+          : "none";
+        document.getElementById("dcAutoRetry").style.display = manual
+          ? "none"
+          : "block";
+        if (!manual) {
+          fetch("http://localhost:3055/health")
+            .then(() => {
+              // Server is up but WebSocket failed — wrong port
+              document.getElementById("dcPortNum").textContent = wsPort;
+              document.getElementById("dcWrongPort").style.display = "block";
+            })
+            .catch(() => {
+              // Server not running yet — needs CC interaction
+              document.getElementById("dcAutoMsg").style.display = "block";
+            });
+        }
+      }
+
+      function connect() {
+        if (manuallyDisconnected) return;
+        setStatus("connecting");
+        ws = new WebSocket("ws://localhost:" + wsPort);
+
+        ws.onopen = () => {
+          setStatus("connected");
+          updateOnboardingConnection(true);
+          parent.postMessage(
+            { pluginMessage: { type: "get-board-state" } },
+            "*",
+          );
+        };
+
+        ws.onclose = () => {
+          setStatus("disconnected");
+          updateOnboardingConnection(false);
+          ws = null;
+          if (!manuallyDisconnected) setTimeout(connect, 3000);
+        };
+
+        ws.onerror = () => ws && ws.close();
+
+        ws.onmessage = (event) => {
+          let cmd;
+          try {
+            cmd = JSON.parse(event.data);
+          } catch {
+            return;
+          }
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "execute-command",
+                id: cmd.id,
+                commandType: cmd.type,
+                params: cmd.params,
+              },
+            },
+            "*",
+          );
+        };
+      }
+
+      window.onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (!msg) return;
+
+        if (msg.type === "onboarding-status") {
+          if (msg.wsPort) {
+            wsPort = msg.wsPort;
+            document.getElementById("portInput").value = wsPort;
+          }
+          if (msg.complete) {
+            document.getElementById("onboarding").style.display = "none";
+            document.getElementById("mainUI").style.display = "flex";
+            onboardingDone = true;
+            pluginH = 480;
+            pluginW = 320;
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: "resize",
+                  width: pluginW,
+                  height: pluginH,
+                },
+              },
+              "*",
+            );
+          } else {
+            document.getElementById("onboarding").style.display = "flex";
+            document.getElementById("mainUI").style.display = "none";
+            goToStep(1);
+          }
+          connect();
+        }
+
+        if (msg.type === "command-result") {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(
+              JSON.stringify({
+                id: msg.id,
+                result: msg.result,
+                error: msg.error,
+              }),
+            );
+          }
+          if (msg.activityText)
+            pushActivity(
+              msg.activityIcon || "+",
+              msg.activityClass || "create",
+              msg.activityText,
+            );
+          parent.postMessage(
+            { pluginMessage: { type: "get-board-state" } },
+            "*",
+          );
+        }
+
+        if (msg.type === "board-state") {
+          updateBreadcrumb(msg.file, msg.page);
+          updateStats(msg.nodes || []);
+        }
+
+        if (msg.type === "page-update") {
+          updateBreadcrumb(msg.file, msg.page);
+        }
+
+        if (msg.type === "page-warning") {
+          const banner = document.getElementById("pageWarningBanner");
+          const text = document.getElementById("pageWarningText");
+          const returnBtn = document.getElementById("pageWarningReturn");
+          text.textContent = `Claude is working on "${msg.claudePage}". If you stay here, new content may be created on this page instead.`;
+          returnBtn.textContent = `Return to "${msg.claudePage}"`;
+          returnBtn.dataset.pageId = msg.claudePageId;
+          banner.classList.add("visible");
+        }
+
+        if (msg.type === "page-warning-clear") {
+          document
+            .getElementById("pageWarningBanner")
+            .classList.remove("visible");
+        }
+      };
+
+      // ── Page warning buttons ─────────────────────────────────────────────────
+      document
+        .getElementById("pageWarningReturn")
+        .addEventListener("click", () => {
+          parent.postMessage(
+            { pluginMessage: { type: "return-to-claude-page" } },
+            "*",
+          );
+          document
+            .getElementById("pageWarningBanner")
+            .classList.remove("visible");
+        });
+
+      document
+        .getElementById("pageWarningDismiss")
+        .addEventListener("click", () => {
+          document
+            .getElementById("pageWarningBanner")
+            .classList.remove("visible");
+        });
+
+      // ── Collapse ────────────────────────────────────────────────────────────
+      const COLLAPSED_H = 80;
+      let isCollapsed = false;
+      let expandedH = 480;
+
+      document.getElementById("collapseBtn").addEventListener("click", () => {
+        isCollapsed = !isCollapsed;
+        const icon = document.getElementById("collapseIcon");
+        if (isCollapsed) {
+          expandedH = pluginH;
+          icon.querySelector("path").setAttribute("d", "M3 9l4-4 4 4");
+          toggleSettings(false);
+          document.getElementById("gearBtn").style.display = "none";
+          document.getElementById("collapseBtn").classList.add("active");
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "resize",
+                width: pluginW,
+                height: COLLAPSED_H,
+              },
+            },
+            "*",
+          );
+          pluginH = COLLAPSED_H;
+        } else {
+          icon.querySelector("path").setAttribute("d", "M3 5l4 4 4-4");
+          document.getElementById("collapseBtn").classList.remove("active");
+          document.getElementById("gearBtn").style.display = "";
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: "resize",
+                width: pluginW,
+                height: expandedH,
+              },
+            },
+            "*",
+          );
+          pluginH = expandedH;
+        }
+      });
+
+      // ── Settings panel ──────────────────────────────────────────────────────
+      function toggleSettings(open) {
+        settingsOpen = open;
+        document.getElementById("settingsPanel").style.display = open
+          ? "block"
+          : "none";
+        document.getElementById("settingsBackdrop").style.display = open
+          ? "block"
+          : "none";
+        document.getElementById("gearBtn").classList.toggle("active", open);
+      }
+
+      document.getElementById("gearBtn").addEventListener("click", () => {
+        toggleSettings(!settingsOpen);
+      });
+
+      document.getElementById("btnApplyPort").addEventListener("click", () => {
+        const val = parseInt(document.getElementById("portInput").value, 10);
+        if (isNaN(val) || val < 1024 || val > 65535) return;
+        wsPort = val;
+        parent.postMessage(
+          { pluginMessage: { type: "save-settings", wsPort: val } },
+          "*",
+        );
+      });
+
+      document
+        .getElementById("btnConnectToggle")
+        .addEventListener("click", () => {
+          if (isConnected) {
+            setDisconnectedState(true);
+            if (ws) {
+              ws.onclose = null;
+              ws.close();
+              ws = null;
+            }
+            setStatus("disconnected");
+          } else {
+            setDisconnectedState(false);
+            connect();
+          }
+        });
+
+      document
+        .getElementById("btnCopyActivity")
+        .addEventListener("click", () => {
+          if (activityLog.length === 0) return;
+          const text = activityLog
+            .map((e) => `${e.icon} ${e.text.replace(/<[^>]+>/g, "")}`)
+            .join("\n");
+          navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById("btnCopyActivity");
+            btn.textContent = "Copied!";
+            btn.classList.add("copied");
+            setTimeout(() => {
+              btn.textContent = "Copy";
+              btn.classList.remove("copied");
+            }, 2000);
+          });
+        });
+
+      document.getElementById("btnFit").addEventListener("click", () => {
+        parent.postMessage({ pluginMessage: { type: "fit-to-board" } }, "*");
+      });
+
+      document.getElementById("btnClear").addEventListener("click", () => {
+        if (
+          confirm("Clear all content from this board? This cannot be undone.")
+        ) {
+          parent.postMessage({ pluginMessage: { type: "clear-board" } }, "*");
+          activityLog = [];
+          document.getElementById("activityLog").innerHTML =
+            '<div class="activity-empty">No activity yet</div>';
+        }
+      });
+
+      // ── Resize handle ────────────────────────────────────────────────────────
+      const handle = document.getElementById("resizeHandle");
+      const obHandle = document.getElementById("obResizeHandle");
+      let pluginW = 320,
+        pluginH = 480;
+      let dragging = false,
+        startX,
+        startY,
+        startW,
+        startH;
+
+      function startDrag(e) {
+        dragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startW = pluginW;
+        startH = pluginH;
+        e.preventDefault();
+      }
+
+      handle.addEventListener("mousedown", startDrag);
+      obHandle.addEventListener("mousedown", startDrag);
+
+      document.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        const w = Math.max(280, startW + (e.clientX - startX));
+        const h = Math.max(200, startH + (e.clientY - startY));
+        pluginW = Math.round(w);
+        pluginH = Math.round(h);
+        document.getElementById("mainUI").style.minHeight = pluginH + "px";
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "resize",
+              width: pluginW,
+              height: pluginH,
+            },
+          },
+          "*",
+        );
+      });
+
+      document.addEventListener("mouseup", () => {
+        dragging = false;
+      });
+    </script>
+  </body>
+</html>

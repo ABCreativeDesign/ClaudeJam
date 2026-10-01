@@ -1,0 +1,14 @@
+{
+  "name": "ClaudeJam",
+  "id": "1623785803318635174",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "src/ui.html",
+  "editorType": ["figjam"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["http://localhost:3055", "ws://localhost:3766"],
+    "devAllowedDomains": ["http://localhost:3055", "ws://localhost:3766"],
+    "reasoning": "This plugin connects to a locally-run MCP server (http://localhost:3055) and WebSocket bridge (ws://localhost:3766) on the user's own machine. These are not third-party services — the user runs the MCP server themselves via npx claudejam setup. No data leaves the user's computer."
+  }
+}

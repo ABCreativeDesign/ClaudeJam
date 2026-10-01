@@ -1,0 +1,17 @@
+{
+  "name": "claudejam-plugin",
+  "version": "1.5.3",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "build": "npm run typecheck && esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --platform=browser",
+    "watch": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --platform=browser --watch",
+    "sync-public": "node scripts/sync-public.mjs"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.0.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.4.0"
+  },
+  "private": true,
+  "license": "MIT"
+}

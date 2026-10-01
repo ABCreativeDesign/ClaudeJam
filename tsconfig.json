@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es2017"],
+    "strict": true,
+    "moduleResolution": "bundler",
+    "types": ["@figma/plugin-typings"]
+  },
+  "include": ["src/code.ts"]
+}
